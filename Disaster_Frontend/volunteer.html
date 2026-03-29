@@ -2,118 +2,116 @@
 <html>
 
 <head>
-
 <title>Volunteer Dashboard</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="style.css">
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark bg-danger">
-
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-danger shadow">
 <div class="container">
-
-<a class="navbar-brand">Volunteer Dashboard</a>
-
+<a class="navbar-brand fw-bold">Volunteer Dashboard</a>
 <a href="index.html" class="btn btn-light">Home</a>
-
 </div>
-
 </nav>
 
-<div class="container mt-5">
+<!-- Table Section -->
+<div class="container mt-5 fade-in">
 
-<h2 class="text-center mb-4">Active Disaster Reports</h2>
+<h2 class="text-center mb-4 fw-bold text-danger">
+Active Disaster Reports
+</h2>
 
-<table class="table table-bordered text-center">
+<div class="table-responsive">
+<table class="table table-bordered text-center align-middle">
 
 <thead class="table-danger">
-
 <tr>
-
 <th>Disaster Type</th>
 <th>Location</th>
 <th>Description</th>
 <th>Status</th>
 <th>Action</th>
-
 </tr>
-
 </thead>
 
 <tbody>
 
 <tr>
-
 <td>Flood</td>
 <td>Delhi</td>
 <td>Heavy flooding in residential area</td>
 
-<td id="status1">Pending</td>
+<td id="status1">
+<span class="badge bg-secondary">Pending</span>
+</td>
 
 <td>
-<button class="btn btn-success" onclick="acceptTask(1)">
+<button class="btn btn-success px-4 shadow-sm" onclick="acceptTask(1)">
 Accept
 </button>
 </td>
-
 </tr>
 
 <tr>
-
 <td>Fire</td>
 <td>Mumbai</td>
 <td>Fire in apartment building</td>
 
-<td id="status2">Pending</td>
+<td id="status2">
+<span class="badge bg-secondary">Pending</span>
+</td>
 
 <td>
-<button class="btn btn-success" onclick="acceptTask(2)">
+<button class="btn btn-success px-4 shadow-sm" onclick="acceptTask(2)">
 Accept
 </button>
 </td>
-
 </tr>
 
 <tr>
-
 <td>Earthquake</td>
 <td>Nepal Border</td>
 <td>Buildings collapsed</td>
 
-<td id="status3">Pending</td>
+<td id="status3">
+<span class="badge bg-secondary">Pending</span>
+</td>
 
 <td>
-<button class="btn btn-success" onclick="acceptTask(3)">
+<button class="btn btn-success px-4 shadow-sm" onclick="acceptTask(3)">
 Accept
 </button>
 </td>
-
 </tr>
 
 </tbody>
 
 </table>
+</div>
 
 </div>
 
+<!-- Status Update Section -->
 <div class="container mt-5">
 
-<h3 class="text-center">Update Task Status</h3>
+<h3 class="text-center fw-bold">Update Task Status</h3>
 
 <div class="text-center mt-3">
 
-<button class="btn btn-warning m-2" onclick="updateStatus('In Progress')">
+<button class="btn btn-warning m-2 px-4 shadow-sm"
+onclick="updateStatus('In Progress')">
 In Progress
 </button>
 
-<button class="btn btn-primary m-2" onclick="updateStatus('Completed')">
+<button class="btn btn-primary m-2 px-4 shadow-sm"
+onclick="updateStatus('Completed')">
 Completed
 </button>
 
@@ -121,38 +119,36 @@ Completed
 
 </div>
 
+<!-- Script -->
 <script>
 
 let currentTask = null;
 
 function acceptTask(id){
-
 currentTask = id;
 
-document.getElementById("status"+id).innerText = "Accepted";
+document.getElementById("status"+id).innerHTML =
+'<span class="badge bg-info">Accepted</span>';
 
-alert("You accepted this disaster response task");
-
+alert("✅ You accepted this disaster response task");
 }
 
 function updateStatus(status){
 
 if(currentTask == null){
-
-alert("Please accept a task first");
-
+alert("⚠️ Please accept a task first");
 return;
-
 }
 
-document.getElementById("status"+currentTask).innerText = status;
+let color = status === "Completed" ? "bg-success" : "bg-warning";
 
-alert("Task status updated to " + status);
+document.getElementById("status"+currentTask).innerHTML =
+`<span class="badge ${color}">${status}</span>`;
 
+alert("✅ Task status updated to " + status);
 }
 
 </script>
 
 </body>
-
 </html>
