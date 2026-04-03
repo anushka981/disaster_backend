@@ -12,9 +12,12 @@ public class DisasterController {
     @Autowired
     private DisasterRepository repo;
 
+    @Autowired
+    private HelpRequestRepository helpRepo;
+
     @GetMapping("/hello")
     public String sayHello() {
-        return "Backend is working 🚀";
+        return "Backend is working ";
     }
 
     @PostMapping("/report")
@@ -36,6 +39,23 @@ public class DisasterController {
     @GetMapping("/reports")
     public List<DisasterReport> getAllReports() {
         return repo.findAll();
+    }
+
+    @PostMapping("/help")
+    public String submitHelpRequest(@RequestBody HelpRequest helpRequest) {
+        helpRepo.save(helpRequest);
+
+        System.out.println("===== New Help Request =====");
+        System.out.println("Help Type: " + helpRequest.getHelpType());
+        System.out.println("Location: " + helpRequest.getLocation());
+        System.out.println("Description: " + helpRequest.getDescription());
+
+        return "Help request submitted successfully";
+    }
+
+    @GetMapping("/help")
+    public List<HelpRequest> getAllHelpRequests() {
+        return helpRepo.findAll();
     }
 
     @PutMapping("/report/{id}/status/{status}")
