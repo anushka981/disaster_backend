@@ -13,7 +13,6 @@
 
 <body>
 
-<!-- Navbar -->
 <nav class="navbar navbar-dark bg-dark shadow">
 <div class="container d-flex justify-content-between">
 
@@ -23,223 +22,454 @@
 <span id="userWelcome" class="text-white me-3"></span>
 
 <a href="index.html" class="btn btn-light">Home</a>
-<button onclick="logout()" class="btn btn-danger ms-2">Logout</button>
+
+<button onclick="logout()" class="btn btn-danger ms-2">
+Logout
+</button>
+
 </div>
 
 </div>
 </nav>
 
-<!-- Overview Cards -->
-<div class="container mt-4 fade-in">
 
-<h2 class="text-center mb-4 fw-bold text-dark">System Overview</h2>
+<div class="container mt-4">
 
-<div class="row text-center g-4">
+<h2 class="text-center fw-bold">
+System Overview
+</h2>
 
-<div class="col-md-4">
-<div class="card p-4">
-<h5 class="text-muted">Total Disasters</h5>
-<h2 class="text-danger fw-bold">12</h2>
-</div>
-</div>
+
+<div class="row text-center g-4 mt-3">
 
 <div class="col-md-4">
 <div class="card p-4">
-<h5 class="text-muted">Help Requests</h5>
-<h2 class="text-primary fw-bold">7</h2>
+
+<h5>Total Disasters</h5>
+
+<h2 id="totalReports" class="text-danger">
+0
+</h2>
+
 </div>
 </div>
+
 
 <div class="col-md-4">
 <div class="card p-4">
-<h5 class="text-muted">Active Volunteers</h5>
-<h2 class="text-success fw-bold">18</h2>
+
+<h5>Help Requests</h5>
+
+<h2 id="totalHelp" class="text-primary">
+0
+</h2>
+
 </div>
 </div>
+
+
+<div class="col-md-4">
+<div class="card p-4">
+
+<h5>Active Volunteers</h5>
+
+<h2 class="text-success">
+18
+</h2>
+
+</div>
+</div>
+
 
 </div>
 
 </div>
+
+
 
 <!-- Disaster Reports -->
+
 <div class="container mt-5">
 
-<h3 class="text-center mb-3 fw-bold">Disaster Reports</h3>
+<h3 class="text-center fw-bold">
+Disaster Reports
+</h3>
 
-<div class="table-responsive">
-<table class="table table-bordered text-center align-middle">
+
+<table class="table table-bordered text-center">
 
 <thead class="table-dark">
+
 <tr>
-<th>Disaster Type</th>
+
+<th>Type</th>
 <th>Location</th>
+<th>Description</th>
 <th>Status</th>
-<th>Assign Volunteer</th>
+<th>Volunteer</th>
+<th>Action</th>
+
 </tr>
+
 </thead>
 
-<tbody>
 
-<tr>
-<td>Flood</td>
-<td>Delhi</td>
-
-<td id="dstatus1">
-<span class="badge bg-secondary">Pending</span>
-</td>
-
-<td>
-<select class="form-select">
-<option>Select Volunteer</option>
-<option>Rahul</option>
-<option>Aman</option>
-<option>Priya</option>
-</select>
-</td>
-</tr>
-
-<tr>
-<td>Fire</td>
-<td>Mumbai</td>
-
-<td id="dstatus2">
-<span class="badge bg-secondary">Pending</span>
-</td>
-
-<td>
-<select class="form-select">
-<option>Select Volunteer</option>
-<option>Rahul</option>
-<option>Aman</option>
-<option>Priya</option>
-</select>
-</td>
-</tr>
-
-<tr>
-<td>Earthquake</td>
-<td>Nepal Border</td>
-
-<td id="dstatus3">
-<span class="badge bg-secondary">Pending</span>
-</td>
-
-<td>
-<select class="form-select">
-<option>Select Volunteer</option>
-<option>Anjali</option>
-<option>Anushka</option>
-<option>Abhishek</option>
-</select>
-</td>
-</tr>
+<tbody id="reportTable">
 
 </tbody>
 
+
 </table>
-</div>
+
 
 </div>
 
-<!-- Status Update -->
-<div class="container mt-5">
 
-<h3 class="text-center fw-bold">Update Disaster Status</h3>
 
-<div class="text-center mt-3">
-
-<button class="btn btn-warning m-2 px-4 shadow-sm"
-onclick="updateStatus(1,'In Progress')">
-Disaster 1 In Progress
-</button>
-
-<button class="btn btn-success m-2 px-4 shadow-sm"
-onclick="updateStatus(1,'Resolved')">
-Disaster 1 Resolved
-</button>
-
-</div>
-
-</div>
 
 <!-- Help Requests -->
-<div class="container mt-5 mb-5">
 
-<h3 class="text-center mb-3 fw-bold">Help Requests</h3>
+<div class="container mt-5">
 
-<div class="table-responsive">
-<table class="table table-bordered text-center align-middle">
+<h3 class="text-center fw-bold">
+Help Requests
+</h3>
+
+
+<table class="table table-bordered text-center">
 
 <thead class="table-primary">
+
 <tr>
-<th>Request Type</th>
+
+<th>Help Type</th>
 <th>Location</th>
-<th>Status</th>
+<th>Description</th>
+
 </tr>
+
 </thead>
 
-<tbody>
 
-<tr>
-<td>Medical Help</td>
-<td>Delhi</td>
-<td><span class="badge bg-secondary">Pending</span></td>
-</tr>
-
-<tr>
-<td>Food Supply</td>
-<td>Mumbai</td>
-<td><span class="badge bg-warning">In Progress</span></td>
-</tr>
-
-<tr>
-<td>Shelter</td>
-<td>Lucknow</td>
-<td><span class="badge bg-success">Completed</span></td>
-</tr>
+<tbody id="helpTable">
 
 </tbody>
 
+
 </table>
-</div>
 
 </div>
 
-<!-- Script -->
+
+
+
+
 <script>
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+fetchReports();
+
+fetchHelpRequests();
+
+
+});
+
+
+
+
+// Disaster Reports
+
+function fetchReports(){
+
+
+fetch("http://localhost:8080/reports")
+
+
+.then(res=>res.json())
+
+
+.then(data=>{
+
+
+let table=document.getElementById("reportTable");
+
+
+table.innerHTML="";
+
+
+document.getElementById("totalReports").innerText=data.length;
+
+
+
+data.forEach(report=>{
+
+
+table.innerHTML += `
+
+
+<tr>
+
+
+<td>${report.disasterType}</td>
+
+
+<td>${report.location}</td>
+
+
+<td>${report.description}</td>
+
+
+<td>
+
+<span class="badge bg-secondary">
+
+${report.status}
+
+</span>
+
+</td>
+
+
+<td>
+
+${report.volunteer || "Not Assigned"}
+
+
+<br>
+
+
+<select id="volunteer${report.id}" class="form-select mt-2">
+
+<option value="">Select</option>
+
+<option>Rahul</option>
+
+<option>Aman</option>
+
+<option>Priya</option>
+
+</select>
+
+
+<button class="btn btn-success btn-sm mt-2"
+onclick="assignVolunteer('${report.id}')">
+
+Assign
+
+</button>
+
+
+</td>
+
+
+<td>
+
+
+<button class="btn btn-warning btn-sm"
+onclick="updateStatus('${report.id}','In Progress')">
+
+In Progress
+
+</button>
+
+
+<button class="btn btn-success btn-sm mt-2"
+onclick="updateStatus('${report.id}','Resolved')">
+
+Resolved
+
+</button>
+
+
+</td>
+
+
+</tr>
+
+
+`;
+
+});
+
+
+});
+
+
+}
+
+
+
+
+// Help Requests
+
+
+function fetchHelpRequests(){
+
+
+fetch("http://localhost:8080/help")
+
+
+.then(res=>res.json())
+
+
+.then(data=>{
+
+
+let table=document.getElementById("helpTable");
+
+
+table.innerHTML="";
+
+
+document.getElementById("totalHelp").innerText=data.length;
+
+
+
+data.forEach(help=>{
+
+
+table.innerHTML += `
+
+
+<tr>
+
+<td>${help.helpType}</td>
+
+<td>${help.location}</td>
+
+<td>${help.description}</td>
+
+
+</tr>
+
+
+`;
+
+
+});
+
+
+});
+
+
+}
+
+
+
+
+// Update Status
+
 
 function updateStatus(id,status){
 
-let color = status === "Resolved" ? "bg-success" : "bg-warning";
 
-document.getElementById("dstatus"+id).innerHTML =
-`<span class="badge ${color}">${status}</span>`;
+fetch(`http://localhost:8080/report/${id}/status/${status}`,{
 
-alert("✅ Disaster status updated to " + status);
+method:"PUT"
+
+})
+
+
+.then(res=>res.text())
+
+
+.then(msg=>{
+
+
+alert(msg);
+
+fetchReports();
+
+
+});
+
+
 }
 
-</script>
-<script>
-let role = localStorage.getItem("role");
 
-if(role !== "admin"){
-    alert("Access Denied!");
-    window.location.href = "login.html";
+
+
+// Assign Volunteer
+
+
+function assignVolunteer(id){
+
+
+let name=document.getElementById("volunteer"+id).value;
+
+
+fetch(`http://localhost:8080/report/${id}/volunteer/${name}`,{
+
+method:"PUT"
+
+})
+
+
+.then(res=>res.text())
+
+
+.then(msg=>{
+
+
+alert(msg);
+
+fetchReports();
+
+
+});
+
+
 }
-</script>
-<script>
-let user = localStorage.getItem("username");
+
+
+
+
+// Login
+
+
+let role=localStorage.getItem("role");
+
+
+if(role!=="admin"){
+
+alert("Access Denied!");
+
+window.location.href="login.html";
+
+}
+
+
+
+let user=localStorage.getItem("username");
+
 
 if(user){
-    document.getElementById("userWelcome").innerText = "Welcome, " + user;
+
+document.getElementById("userWelcome").innerText="Welcome, "+user;
+
 }
 
+
+
+
 function logout(){
-    localStorage.removeItem("role");
-    localStorage.removeItem("username");
-    window.location.href = "login.html";
+
+localStorage.removeItem("role");
+
+localStorage.removeItem("username");
+
+
+window.location.href="login.html";
+
+
 }
+
+
+
 </script>
+
 
 </body>
 

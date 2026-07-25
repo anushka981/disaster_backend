@@ -19,7 +19,7 @@
 
 <div class="mb-3">
 <label>Type of Help</label>
-<select class="form-select">
+<select id="helpType" class="form-select" required>
 <option>Medical</option>
 <option>Food</option>
 <option>Shelter</option>
@@ -27,11 +27,11 @@
 </select>
 </div>
 
-<!-- 🔥 UPDATED LOCATION -->
+<!-- location -->
 <div class="mb-3">
 <label>Location</label>
 
-<select class="form-select" onchange="handleLocationChange(this, 'helpOtherLocation')" required>
+<select id="helpLocation" class="form-select" onchange="handleLocationChange(this, 'helpOtherLocation')" required>
 <option value="">Select Location</option>
 
 <option>Delhi</option>
@@ -47,6 +47,8 @@
 <option>Ghaziabad</option>
 
 <option>Other</option>
+
+
 </select>
 
 <input type="text" id="helpOtherLocation" class="form-control mt-2"
@@ -55,7 +57,7 @@ placeholder="Enter your location" style="display:none;">
 
 <div class="mb-3">
 <label>Description</label>
-<textarea class="form-control" placeholder="Describe your need"></textarea>
+<textarea id="helpDescription" class="form-control" placeholder="Describe your need" required></textarea>
 </div>
 
 <button class="btn btn-primary w-100">Submit Request</button>
@@ -66,7 +68,7 @@ placeholder="Enter your location" style="display:none;">
 
 <script src="js/script.js"></script>
 
-<!-- 🔥 LOCATION SCRIPT -->
+<!-- LOCATION SCRIPT -->
 <script>
 function handleLocationChange(select, inputId) {
   let otherInput = document.getElementById(inputId);
@@ -79,6 +81,7 @@ function handleLocationChange(select, inputId) {
     otherInput.required = false;
   }
 }
+
 </script>
 
 </body>
