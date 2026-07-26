@@ -24,7 +24,9 @@ public class DisasterController {
     public String submitReport(@RequestBody DisasterReport report) {
         report.setStatus("Pending");
         report.setVolunteer("");
-        repo.save(report);
+        DisasterReport savedReport = repo.save(report);
+
+        System.out.println("SAVED ID: " + savedReport.getId());
 
         System.out.println("===== New Disaster Report =====");
         System.out.println("Disaster Type: " + report.getDisasterType());
