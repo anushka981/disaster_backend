@@ -14,6 +14,8 @@ public class DisasterReport {
     private String description;
     private String status;
     private String volunteer;
+    private Double latitude;
+    private Double longitude;
 
     public String getId() {
         return id;
@@ -57,5 +59,21 @@ public class DisasterReport {
 
     public void setVolunteer(String volunteer) {
         this.volunteer = volunteer;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }
