@@ -1,8 +1,8 @@
 package com.anushka.disaster_backend;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import java.util.List;
 
 @RestController
@@ -12,16 +12,18 @@ import java.util.List;
 })
 public class AuthController {
 
-    @Autowired
-    private VolunteerReepository repo;
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final VolunteerRepository repo;
+    private final PasswordEncoder encoder;
 
+    public AuthController(VolunteerRepository repo, PasswordEncoder encoder) {
+        this.repo = repo;
+        this.encoder = encoder;
+    }
 
     @PostMapping("/signup")
-
     public String signup(@RequestBody Volunteer volunteer) {
 
-        if (repo.findByUsername(volunteer.getUsername()) != null) {
+        if (repo.findByUsernameIgnoreCase(volunteer.getUsername()).isPresent()) {
             return "Username already exists!";
         }
 
@@ -33,7 +35,8 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@RequestBody Volunteer volunteer) {
 
-        Volunteer user = repo.findByUsername(volunteer.getUsername());
+        Volunteer user = repo.findByUsernameIgnoreCase(volunteer.getUsername())
+                .orElse(null);
 
         if (user == null) {
             return "User Not Found";
@@ -45,8 +48,9 @@ public class AuthController {
 
         return user.getRole();
     }
+
     @GetMapping("/volunteers")
     public List<Volunteer> getVolunteers() {
-        return repo.findByRole("volunteer");
+        return repo.findByRoleIgnoreCase("volunteer");
     }
 }

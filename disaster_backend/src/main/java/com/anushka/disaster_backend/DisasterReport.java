@@ -3,6 +3,8 @@ package com.anushka.disaster_backend;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Document(collection = "reports")
 public class DisasterReport {
 
@@ -14,8 +16,10 @@ public class DisasterReport {
     private String description;
     private String status;
     private String volunteer;
-    private Double latitude;
-    private Double longitude;
+    private String imageUrl;
+    private Instant createdAt;
+    private Instant updatedAt;
+
 
     public String getId() {
         return id;
@@ -61,19 +65,16 @@ public class DisasterReport {
         this.volunteer = volunteer;
     }
 
-    public Double getLatitude() {
-        return latitude;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

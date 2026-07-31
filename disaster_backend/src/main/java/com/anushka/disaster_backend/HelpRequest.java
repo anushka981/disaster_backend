@@ -3,6 +3,8 @@ package com.anushka.disaster_backend;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Document(collection = "help_requests")
 public class HelpRequest {
 
@@ -14,6 +16,8 @@ public class HelpRequest {
     private String latitude;
     private String longitude;
     private String description;
+    private String status;
+    private Instant createdAt;
 
     public HelpRequest() {
     }
@@ -65,4 +69,9 @@ public class HelpRequest {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
