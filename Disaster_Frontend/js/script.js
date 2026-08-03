@@ -1,7 +1,3 @@
-// ===============================
-// SHOW MESSAGE
-// ===============================
-
 function showAlert(icon, title, text){
 
     Swal.fire({

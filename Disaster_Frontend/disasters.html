@@ -12,7 +12,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
+     
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
     <style>
 
         body{
@@ -42,21 +44,18 @@
                 width:450px;
                 min-width:450px;
             }
-                    .btn-view{
-            border-radius:20px;
-            padding:4px 14px;
-        
-            @media(max-width:768px){
+                            .btn-view{
+                        border-radius:20px;
+                        padding:4px 14px;
+                            }
 
-                .search-box{
-                    width:100%;
-                    min-width:100%;
-                }
-            }
+                    @media(max-width:768px){
 
-            .search-box{
-                max-width:100%;
-            }
+                        .search-box{
+                            width:100%;
+                            min-width:100%;
+                            max-width:100%;
+                        }
 
         
     }
@@ -147,6 +146,14 @@
 
                 </button>
 
+                <button
+                        class="btn btn-success btn-lg px-4"
+                        onclick="exportExcel()">
+
+                        <i class="bi bi-file-earmark-excel"></i>
+                        Export Excel
+
+                    </button>
                 </div>
 
             </div>
@@ -459,6 +466,41 @@ function searchDisasters(){
         console.error(error);
 
         alert("Search failed.");
+
+    });
+
+}
+function exportExcel() {
+
+    fetch("http://localhost:8080/reports", {
+        headers: authHeaders()
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        const excelData = data.map(report => ({
+            "Disaster Type": report.disasterType,
+            "Location": report.location,
+            "Description": report.description,
+            "Status": report.status,
+            "Volunteer": report.volunteer || "Not Assigned",
+            "Reported On": report.createdAt
+                ? new Date(report.createdAt).toLocaleString("en-IN")
+                : "-"
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Disaster Reports");
+
+        XLSX.writeFile(workbook, "Disaster_Reports.xlsx");
+
+    })
+    .catch(error => {
+
+        console.error(error);
+        alert("Excel export failed.");
 
     });
 
