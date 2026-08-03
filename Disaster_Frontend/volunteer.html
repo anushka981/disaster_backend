@@ -103,6 +103,14 @@ Assigned Disaster Reports
 <script>
 
 
+function authHeaders(extra) {
+    return Object.assign(
+        { "Authorization": "Bearer " + localStorage.getItem("token") },
+        extra || {}
+    );
+}
+
+
 document.addEventListener("DOMContentLoaded",function(){
 
 fetchAssignedReports();
@@ -114,9 +122,11 @@ fetchAssignedReports();
 
 
 function fetchAssignedReports(){
+let username = localStorage.getItem("username");
 
-
-fetch("http://localhost:8080/reports")
+fetch("http://localhost:8080/reports", {
+    headers: authHeaders()
+})
 
 
 .then(response=>response.json())
@@ -137,7 +147,7 @@ data.forEach(report=>{
 
 // only assigned reports
 
-if(report.volunteer && report.volunteer !== ""){
+if(report.volunteer == username){
 
 
 table.innerHTML += `
@@ -179,7 +189,7 @@ ${report.status}
 
 <button class="btn btn-warning btn-sm"
 
-onclick="updateTask('${report.id}','In Progress')">
+onclick="updateTask('${report.id}','IN_PROGRESS')">
 
 Start
 
@@ -189,7 +199,7 @@ Start
 
 <button class="btn btn-success btn-sm mt-2"
 
-onclick="updateTask('${report.id}','Resolved')">
+onclick="updateTask('${report.id}','RESOLVED')">
 
 Complete
 
@@ -236,22 +246,24 @@ function updateTask(id,status){
 fetch(`http://localhost:8080/report/${id}/status/${status}`,{
 
 
-method:"PUT"
+method:"PUT",
+headers: authHeaders()
 
 
 })
 
 
-.then(response=>response.text())
+.then(async response => {
 
+    const data = await response.json();
 
-.then(msg=>{
+    if (!response.ok) {
+        alert(data.error || "Could not update status");
+        return;
+    }
 
-
-alert(msg);
-
-fetchAssignedReports();
-
+    alert("Status updated to " + data.status);
+    fetchAssignedReports();
 
 });
 
@@ -259,65 +271,27 @@ fetchAssignedReports();
 }
 
 
-
-
-
-
-
-// Login Check
-
-
 let role = localStorage.getItem("role");
 
-
-if(role !== "volunteer"){
-
-
-alert("Access Denied!");
-
-window.location.href="login.html";
-
-
+if (role !== "volunteer") {
+    alert("Access Denied!");
+    window.location.href = "login.html";
 }
-
-
-
-
 
 let user = localStorage.getItem("username");
 
-
-if(user){
-
-
-document.getElementById("userWelcome").innerText =
-"Welcome, " + user;
-
-
+if (user) {
+    document.getElementById("userWelcome").innerText = "Welcome, " + user;
 }
 
-
-
-
-
-function logout(){
-
-
-localStorage.removeItem("role");
-
-localStorage.removeItem("username");
-
-window.location.href="login.html";
-
-
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
 }
-
-
 
 </script>
-
-
-
 </body>
 
 </html>

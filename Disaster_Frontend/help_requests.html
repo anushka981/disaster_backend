@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>All Help Requests</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="style.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark shadow">
+<div class="container d-flex justify-content-between">
+
+<a class="navbar-brand fw-bold">All Help Requests</a>
+
+<div>
+<a href="admin.html" class="btn btn-light">Back to Dashboard</a>
+</div>
+
+</div>
+</nav>
+
+<div class="container mt-4">
+
+<h2 class="text-center fw-bold mb-4">All Help Requests</h2>
+
+<div class="table-responsive">
+<table class="table table-bordered text-center align-middle">
+
+<thead class="table-primary">
+<tr>
+<th>Help Type</th>
+<th>Location</th>
+<th>Description</th>
+<th>Status</th>
+<th>Requested On</th>
+</tr>
+</thead>
+
+<tbody id="helpTable">
+</tbody>
+
+</table>
+</div>
+
+</div>
+
+<script>
+
+function authHeaders() {
+    return { "Authorization": "Bearer " + localStorage.getItem("token") };
+}
+
+let role = localStorage.getItem("role");
+if (role !== "coordinator") {
+    alert("Access Denied!");
+    window.location.href = "login.html";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchAllHelpRequests();
+});
+
+function fetchAllHelpRequests() {
+
+    fetch("http://localhost:8080/help", {
+        headers: authHeaders()
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        let table = document.getElementById("helpTable");
+        table.innerHTML = "";
+
+        if (data.length === 0) {
+            table.innerHTML = `<tr><td colspan="5">No help requests yet.</td></tr>`;
+            return;
+        }
+
+        data.forEach(help => {
+
+            const requestedOn = help.createdAt
+        ? new Date(help.createdAt).toLocaleString('en-IN', { hour12: true, hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })
+                : "-";
+
+            table.innerHTML += `
+                <tr>
+                    <td>${help.helpType}</td>
+                    <td>${help.location}</td>
+                    <td>${help.description}</td>
+                    <td><span class="badge bg-info text-dark">${help.status || "OPEN"}</span></td>
+                    <td>${requestedOn}</td>
+                </tr>
+            `;
+
+        });
+
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Could not load help requests.");
+    });
+
+}
+
+</script>
+
+</body>
+</html>

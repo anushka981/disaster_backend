@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>All Disaster Reports</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+
+        body{
+            background:#f4f6f9;
+        }
+
+        .page-card{
+            border:none;
+            border-radius:15px;
+            box-shadow:0 5px 20px rgba(0,0,0,.08);
+        }
+
+        .table thead{
+            background:#212529;
+            color:white;
+        }
+
+        .table tbody tr:hover{
+            background:#f8f9fa;
+        }
+
+        .badge{
+            font-size:.85rem;
+            padding:8px 12px;
+        }
+            .search-box{
+                width:450px;
+                min-width:450px;
+            }
+                    .btn-view{
+            border-radius:20px;
+            padding:4px 14px;
+        
+            @media(max-width:768px){
+
+                .search-box{
+                    width:100%;
+                    min-width:100%;
+                }
+            }
+
+            .search-box{
+                max-width:100%;
+            }
+
+        
+    }
+
+        @media print {
+            nav, .header-row, .btn {
+                display: none !important;
+            }
+            body {
+                background: white;
+                padding: 20px;
+            }
+            .page-card {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark shadow-sm">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold">
+            <i class="bi bi-shield-fill-check"></i>
+            Disaster Admin
+        </a>
+
+        <a href="admin.html" class="btn btn-light">
+            <i class="bi bi-arrow-left"></i>
+            Back to Dashboard
+        </a>
+
+    </div>
+
+</nav>
+
+<div class="container py-4">
+
+    <div class="card page-card">
+
+        <div class="card-body">
+
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 header-row">
+
+                <h3 class="fw-bold mb-3 mb-lg-0">
+                    <i class="bi bi-list-ul text-primary"></i>
+                    All Disaster Reports
+                </h3>
+
+                <div class="d-flex flex-column flex-md-row gap-2">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="form-control form-control-lg search-box"
+                    placeholder="Search by Location or Disaster Type">
+
+                                <button
+                    class="btn btn-primary btn-lg px-4"
+                    onclick="searchDisasters()">
+
+                    <i class="bi bi-search"></i>
+                    Search
+
+                </button>
+
+                <button
+                    class="btn btn-outline-secondary btn-lg px-4"
+                    onclick="fetchAllDisasters()">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Reset
+
+                </button>
+
+                <button
+                    class="btn btn-outline-dark btn-lg px-4"
+                    onclick="window.print()">
+
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    Export PDF
+
+                </button>
+
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle text-center">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Volunteer</th>
+                        <th>Reported On</th>
+                        <th>Image</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody id="disasterTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function authHeaders(){
+
+    return{
+
+        "Authorization":"Bearer "+localStorage.getItem("token")
+
+    };
+
+}
+
+let role = localStorage.getItem("role");
+
+if(role !== "coordinator"){
+
+    alert("Access Denied!");
+
+    window.location.href="login.html";
+
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    fetchAllDisasters();
+
+    document.getElementById("searchInput").addEventListener("keyup",function(e){
+
+        if(e.key==="Enter"){
+
+            searchDisasters();
+
+        }
+
+    });
+
+});
+
+function deleteReport(id){
+
+    if(!confirm("Are you sure you want to delete this report?")){
+        return;
+    }
+
+    fetch(`http://localhost:8080/report/${id}/delete`,{
+
+        method:"DELETE",
+        headers:authHeaders()
+
+    })
+
+    .then(res=>{
+
+        if(res.ok){
+            alert("Report deleted successfully");
+            fetchAllDisasters();
+        }
+        else{
+            return res.json().then(data=>{
+                alert(data.error || "Could not delete report");
+            });
+        }
+
+    })
+
+    .catch(error=>{
+        console.error(error);
+        alert("Delete failed.");
+    });
+
+}
+
+function displayReports(data){
+
+    let table=document.getElementById("disasterTable");
+
+    table.innerHTML="";
+
+    if(data.length===0){
+
+        table.innerHTML=`
+
+        <tr>
+
+            <td colspan="8" class="text-center text-danger fw-semibold py-4">
+
+                No disaster reports found.
+
+            </td>
+
+        </tr>
+
+        `;
+
+        return;
+
+    }
+
+    data.forEach(report=>{
+
+        const reportedOn=report.createdAt
+
+        ? new Date(report.createdAt).toLocaleString("en-IN",{
+
+            hour12:true,
+            hour:"2-digit",
+            minute:"2-digit",
+            day:"2-digit",
+            month:"2-digit",
+            year:"numeric"
+
+        })
+
+        : "-";
+
+        let badgeClass="bg-secondary";
+
+        if(report.status==="Pending"){
+
+            badgeClass="bg-warning text-dark";
+
+        }
+
+        else if(report.status==="In Progress"){
+
+            badgeClass="bg-primary";
+
+        }
+
+        else if(report.status==="Resolved"){
+
+            badgeClass="bg-success";
+
+        }
+
+        const imageCell = report.imageUrl
+            ? `<a href="http://localhost:8080${report.imageUrl}" target="_blank" class="btn btn-outline-primary btn-sm btn-view"><i class="bi bi-image"></i> View</a>`
+            : `<span class="text-muted">No Image</span>`;
+
+        table.innerHTML += `
+
+        <tr>
+
+            <td class="fw-semibold">${report.disasterType}</td>
+
+            <td>${report.location}</td>
+
+            <td style="max-width:260px;">
+                ${report.description}
+            </td>
+
+            <td>
+
+                <span class="badge ${badgeClass}">
+                    ${report.status}
+                </span>
+
+            </td>
+
+            <td>
+
+                ${report.volunteer || "<span class='text-danger'>Not Assigned</span>"}
+
+            </td>
+
+            <td>
+
+                ${reportedOn}
+
+            </td>
+
+            <td>
+
+                ${imageCell}
+
+            </td>
+
+            <td>
+
+                <button class="btn btn-danger btn-sm" onclick="deleteReport('${report.id}')">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+function fetchAllDisasters(){
+
+    document.getElementById("searchInput").value="";
+
+    fetch("http://localhost:8080/reports",{
+
+        headers:authHeaders()
+
+    })
+
+    .then(res=>res.json())
+
+    .then(data=>{
+
+        displayReports(data);
+
+    })
+
+    .catch(error=>{
+
+        console.error(error);
+
+        alert("Could not load disaster reports.");
+
+    });
+
+}
+
+function searchDisasters(){
+
+    const keyword=document.getElementById("searchInput")
+        .value
+        .trim()
+        .toLowerCase();
+
+    fetch("http://localhost:8080/reports",{
+
+        headers:authHeaders()
+
+    })
+
+    .then(res=>res.json())
+
+    .then(data=>{
+
+        const filtered=data.filter(report=>
+
+            (
+
+                report.location &&
+
+                report.location
+                .toLowerCase()
+                .includes(keyword)
+
+            )
+
+            ||
+
+            (
+
+                report.disasterType &&
+
+                report.disasterType
+                .toLowerCase()
+                .includes(keyword)
+
+            )
+
+        );
+
+        displayReports(filtered);
+
+    })
+
+    .catch(error=>{
+
+        console.error(error);
+
+        alert("Search failed.");
+
+    });
+
+}
+
+</script>
+
+</body>
+
+</html>

@@ -43,7 +43,7 @@ System Overview
 <div class="row text-center g-4 mt-3">
 
 <div class="col-md-4">
-<div class="card p-4">
+<div class="card p-4" style="cursor:pointer" onclick="window.location.href='disasters.html'">
 
 <h5>Total Disasters</h5>
 
@@ -56,7 +56,7 @@ System Overview
 
 
 <div class="col-md-4">
-<div class="card p-4">
+<div class="card p-4" style="cursor:pointer" onclick="window.location.href='help_requests.html'">
 
 <h5>Help Requests</h5>
 
@@ -69,14 +69,13 @@ System Overview
 
 
 <div class="col-md-4">
-<div class="card p-4">
+<div class="card p-4" style="cursor:pointer" onclick="window.location.href='volunteers.html'">
 
 <h5>Active Volunteers</h5>
 
-<h2 class="text-success">
-18
+<h2 id="totalVolunteers" class="text-success">
+0
 </h2>
-
 </div>
 </div>
 
@@ -89,7 +88,7 @@ System Overview
 
 <!-- Disaster Reports -->
 
-<div class="container mt-5">
+<div class="container mt-5" id="reportsSection">
 
 <h3 class="text-center fw-bold">
 Disaster Reports
@@ -129,7 +128,7 @@ Disaster Reports
 
 <!-- Help Requests -->
 
-<div class="container mt-5">
+<div class="container mt-5" id="helpSection">
 
 <h3 class="text-center fw-bold">
 Help Requests
@@ -163,16 +162,55 @@ Help Requests
 
 
 
+<!-- Volunteers -->
+
+<div class="container mt-5" id="volunteersSection">
+
+<h3 class="text-center fw-bold">
+Active Volunteers
+</h3>
+
+<table class="table table-bordered text-center">
+
+<thead class="table-success">
+<tr>
+<th>Username</th>
+<th>Role</th>
+</tr>
+</thead>
+
+<tbody id="volunteerListTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+
+
+
 
 <script>
 
 
-document.addEventListener("DOMContentLoaded",function(){
+// ===============================
+// AUTH HELPERS
+// ===============================
 
-fetchReports();
+function authHeaders(extra) {
+    const headers = Object.assign(
+        { "Authorization": "Bearer " + localStorage.getItem("token") },
+        extra || {}
+    );
+    return headers;
+}
 
-fetchHelpRequests();
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    fetchVolunteers();
+    fetchHelpRequests();
 
 });
 
@@ -183,8 +221,11 @@ fetchHelpRequests();
 
 function fetchReports(){
 
+window.volunteers = window.volunteers || [];
 
-fetch("http://localhost:8080/reports")
+fetch("http://localhost:8080/reports", {
+    headers: authHeaders()
+})
 
 
 .then(res=>res.json())
@@ -239,25 +280,15 @@ ${report.volunteer || "Not Assigned"}
 
 <br>
 
-
 <select id="volunteer${report.id}" class="form-select mt-2">
-
-<option value="">Select</option>
-
-<option>Rahul</option>
-
-<option>Aman</option>
-
-<option>Priya</option>
-
+${window.volunteers.map(v =>
+`<option value="${v.username}">${v.username}</option>`
+).join("")}
 </select>
-
 
 <button class="btn btn-success btn-sm mt-2"
 onclick="assignVolunteer('${report.id}')">
-
 Assign
-
 </button>
 
 
@@ -268,7 +299,7 @@ Assign
 
 
 <button class="btn btn-warning btn-sm"
-onclick="updateStatus('${report.id}','In Progress')">
+onclick="updateStatus('${report.id}','IN_PROGRESS')">
 
 In Progress
 
@@ -276,7 +307,7 @@ In Progress
 
 
 <button class="btn btn-success btn-sm mt-2"
-onclick="updateStatus('${report.id}','Resolved')">
+onclick="updateStatus('${report.id}','RESOLVED')">
 
 Resolved
 
@@ -308,7 +339,9 @@ Resolved
 function fetchHelpRequests(){
 
 
-fetch("http://localhost:8080/help")
+fetch("http://localhost:8080/help", {
+    headers: authHeaders()
+})
 
 
 .then(res=>res.json())
@@ -367,21 +400,23 @@ function updateStatus(id,status){
 
 fetch(`http://localhost:8080/report/${id}/status/${status}`,{
 
-method:"PUT"
+method:"PUT",
+headers: authHeaders()
 
 })
 
 
-.then(res=>res.text())
+.then(async res => {
 
+    const data = await res.json();
 
-.then(msg=>{
+    if (!res.ok) {
+        alert(data.error || "Could not update status");
+        return;
+    }
 
-
-alert(msg);
-
-fetchReports();
-
+    alert("Status updated to " + data.status);
+    fetchReports();
 
 });
 
@@ -402,21 +437,23 @@ let name=document.getElementById("volunteer"+id).value;
 
 fetch(`http://localhost:8080/report/${id}/volunteer/${name}`,{
 
-method:"PUT"
+method:"PUT",
+headers: authHeaders()
 
 })
 
 
-.then(res=>res.text())
+.then(async res => {
 
+    const data = await res.json();
 
-.then(msg=>{
+    if (!res.ok) {
+        alert(data.error || "Could not assign volunteer");
+        return;
+    }
 
-
-alert(msg);
-
-fetchReports();
-
+    alert("Volunteer assigned: " + data.volunteer);
+    fetchReports();
 
 });
 
@@ -428,47 +465,58 @@ fetchReports();
 
 // Login
 
+let role = localStorage.getItem("role");
 
-let role=localStorage.getItem("role");
-
-
-if(role!=="admin"){
-
-alert("Access Denied!");
-
-window.location.href="login.html";
-
+if (role !== "coordinator") {
+    alert("Access Denied!");
+    window.location.href = "login.html";
 }
 
+let user = localStorage.getItem("username");
 
-
-let user=localStorage.getItem("username");
-
-
-if(user){
-
-document.getElementById("userWelcome").innerText="Welcome, "+user;
-
+if (user) {
+    document.getElementById("userWelcome").innerText = "Welcome, " + user;
 }
 
-
-
-
-function logout(){
-
-localStorage.removeItem("role");
-
-localStorage.removeItem("username");
-
-
-window.location.href="login.html";
-
-
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
 }
 
+function fetchVolunteers() {
 
+    fetch("http://localhost:8080/volunteers", {
+        headers: authHeaders()
+    })
+    .then(res => res.json())
+    .then(data => {
 
+        window.volunteers = data;
+
+        document.getElementById("totalVolunteers").innerText = data.length;
+
+        let table = document.getElementById("volunteerListTable");
+        table.innerHTML = "";
+
+        data.forEach(v => {
+            table.innerHTML += `
+                <tr>
+                    <td>${v.username}</td>
+                    <td>${v.role}</td>
+                </tr>
+            `;
+        });
+
+        fetchReports();
+
+    });
+
+}
 </script>
+
+
 
 
 </body>
