@@ -19,7 +19,8 @@ public class DisasterReport {
     private String imageUrl;
     private Instant createdAt;
     private Instant updatedAt;
-
+    private Double latitude;
+    private Double longitude;
 
     public String getId() {
         return id;

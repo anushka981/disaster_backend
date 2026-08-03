@@ -1,5 +1,6 @@
 package com.anushka.disaster_backend;
 
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,39 +15,41 @@ public class AuthController {
 
     private final VolunteerRepository repo;
     private final PasswordEncoder encoder;
+    private final JwtService jwtService;
 
-    public AuthController(VolunteerRepository repo, PasswordEncoder encoder) {
+    public AuthController(VolunteerRepository repo, PasswordEncoder encoder, JwtService jwtService) {
         this.repo = repo;
         this.encoder = encoder;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/signup")
-    public String signup(@RequestBody Volunteer volunteer) {
+    public String signup(@Valid @RequestBody SignupRequest request) {
 
-        if (repo.findByUsernameIgnoreCase(volunteer.getUsername()).isPresent()) {
+        if (repo.findByUsernameIgnoreCase(request.username()).isPresent()) {
             return "Username already exists!";
         }
 
-        volunteer.setPassword(encoder.encode(volunteer.getPassword()));
+        Volunteer volunteer = new Volunteer();
+        volunteer.setUsername(request.username());
+        volunteer.setPassword(encoder.encode(request.password()));
+        volunteer.setRole("volunteer"); // everyone who signs up is a volunteer; coordinators are bootstrapped separately
         repo.save(volunteer);
         return "Signup Successful";
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody Volunteer volunteer) {
+    public AuthResponse login(@Valid @RequestBody AuthRequest request) {
 
-        Volunteer user = repo.findByUsernameIgnoreCase(volunteer.getUsername())
-                .orElse(null);
+        Volunteer user = repo.findByUsernameIgnoreCase(request.username())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (user == null) {
-            return "User Not Found";
+        if (!encoder.matches(request.password(), user.getPassword())) {
+            throw new IllegalArgumentException("Wrong password");
         }
 
-        if (!encoder.matches(volunteer.getPassword(), user.getPassword())) {
-            return "Wrong Password";
-        }
-
-        return user.getRole();
+        String token = jwtService.generateToken(user.getUsername());
+        return new AuthResponse(token, user.getUsername(), user.getRole());
     }
 
     @GetMapping("/volunteers")
@@ -54,3 +57,4 @@ public class AuthController {
         return repo.findByRoleIgnoreCase("volunteer");
     }
 }
+

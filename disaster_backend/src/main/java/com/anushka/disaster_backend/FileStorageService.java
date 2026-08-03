@@ -39,4 +39,3 @@ public class FileStorageService {
         return "/uploads/" + filename;
     }
 }
-

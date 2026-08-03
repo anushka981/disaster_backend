@@ -8,4 +8,5 @@ public interface DisasterRepository extends MongoRepository<DisasterReport, Stri
     List<DisasterReport> findByVolunteer(String volunteer);
     List<DisasterReport> findByLocationContainingIgnoreCase(String location);
     List<DisasterReport> findByDisasterTypeContainingIgnoreCase(String disasterType);
+    List<DisasterReport> findAllByOrderByCreatedAtDesc();
 }

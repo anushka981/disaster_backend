@@ -3,6 +3,8 @@ package com.anushka.disaster_backend;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.validation.annotation.Validated;
@@ -35,8 +37,11 @@ public class DisasterController {
 
     @PostMapping("/report")
     public ResponseEntity<DisasterReport> submitReport(
-            @RequestParam @NotBlank String disasterType, @RequestParam @NotBlank String location,
+            @RequestParam @NotBlank String disasterType,
+            @RequestParam @NotBlank String location,
             @RequestParam @NotBlank String description,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
             @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
         DisasterReport report = new DisasterReport();
         report.setDisasterType(disasterType.trim());
@@ -51,8 +56,7 @@ public class DisasterController {
     }
 
     @GetMapping("/reports")
-    public List<DisasterReport> getAllReports() { return reports.findAll(); }
-
+    public List<DisasterReport> getAllReports() { return reports.findAllByOrderByCreatedAtDesc(); }
     @GetMapping("/report/{id}")
     public ResponseEntity<DisasterReport> getReport(@PathVariable String id) {
         return reports.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -68,12 +72,25 @@ public class DisasterController {
     public List<DisasterReport> searchByType(@RequestParam @NotBlank String disasterType) { return reports.findByDisasterTypeContainingIgnoreCase(disasterType.trim()); }
 
     @PutMapping("/report/{id}/status/{status}")
-    public ResponseEntity<DisasterReport> updateStatus(@PathVariable String id, @PathVariable String status) {
+    public ResponseEntity<DisasterReport> updateStatus(@PathVariable String id, @PathVariable String status,
+                                                       Authentication authentication) {
         String normalized = status.trim().toUpperCase(Locale.ROOT);
         if (!REPORT_STATUSES.contains(normalized)) throw new IllegalArgumentException("Unsupported report status");
-        return reports.findById(id).map(report -> {
-            report.setStatus(normalized); report.setUpdatedAt(Instant.now()); return ResponseEntity.ok(reports.save(report));
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+
+        DisasterReport report = reports.findById(id).orElse(null);
+        if (report == null) return ResponseEntity.notFound().build();
+
+        boolean isCoordinator = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINATOR"));
+        boolean isAssignedVolunteer = authentication.getName().equalsIgnoreCase(report.getVolunteer());
+
+        if (!isCoordinator && !isAssignedVolunteer) {
+            throw new AccessDeniedException("Only the assigned volunteer or a coordinator can update this report");
+        }
+
+        report.setStatus(normalized);
+        report.setUpdatedAt(Instant.now());
+        return ResponseEntity.ok(reports.save(report));
     }
 
     @PutMapping("/report/{id}/volunteer/{username}")

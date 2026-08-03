@@ -2,6 +2,7 @@ package com.anushka.disaster_backend;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,7 +29,20 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll())
+                        // open to everyone, no login needed
+                        .requestMatchers("/signup", "/login", "/hello").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/report", "/help").permitAll()
+
+                        // only coordinators can assign volunteers or delete anything
+                        .requestMatchers(HttpMethod.PUT, "/report/*/volunteer/*").hasRole("COORDINATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/report/*/delete").hasRole("COORDINATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/help/*/delete").hasRole("COORDINATOR")
+
+                        // status updates: any logged-in user may call this; DisasterController checks
+                        // that it's either a coordinator or the volunteer assigned to that report
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -61,4 +75,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
