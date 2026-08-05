@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Live Disaster ap</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+
+body{
+margin:0;
+padding:0;
+}
+
+#map{
+height:90vh;
+width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+
+<div class="container">
+
+<a class="navbar-brand">
+🗺 Live Disaster Map
+</a>
+
+<a href="admin.html" class="btn btn-light">
+Back
+</a>
+
+</div>
+
+</nav>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map("map").setView([20.5937,78.9629],5);
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+    maxZoom:19,
+    attribution:"© OpenStreetMap"
+}
+).addTo(map);
+
+fetch("http://localhost:8080/reports",{
+
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+
+})
+
+.then(response=>{
+
+console.log("Status:",response.status);
+
+return response.json();
+
+})
+
+.then(reports=>{
+
+console.log("Reports:",reports);
+
+reports.forEach(report=>{
+
+console.log(report.latitude,report.longitude);
+
+if(report.latitude!=null && report.longitude!=null){
+
+L.marker([report.latitude,report.longitude])
+
+.addTo(map)
+
+.bindPopup(`
+
+<b>${report.disasterType}</b>
+
+<br>
+
+📍 ${report.location}
+
+<br>
+
+📌 ${report.status}
+
+<br><br>
+
+${report.description}
+
+`);
+
+}
+
+});
+
+})
+
+.catch(error=>{
+
+console.error(error);
+
+alert("Reports load nahi ho paaye.");
+
+});
+
+</script>
+
+</body>
+
+</html>

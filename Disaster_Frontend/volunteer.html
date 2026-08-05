@@ -68,13 +68,14 @@ Assigned Disaster Reports
 <thead class="table-danger">
 
 <tr>
-
 <th>Disaster Type</th>
 <th>Location</th>
-<th>Description</th>
 <th>Status</th>
+<th>Assigned</th>
+<th>Started</th>
+<th>Resolved</th>
+<th>Time Taken</th>
 <th>Action</th>
-
 </tr>
 
 </thead>
@@ -117,127 +118,131 @@ fetchAssignedReports();
 
 });
 
-
-
-
-
 function fetchAssignedReports(){
+
 let username = localStorage.getItem("username");
 
-fetch("http://localhost:8080/reports", {
+fetch("http://localhost:8080/reports",{
     headers: authHeaders()
 })
 
-
 .then(response=>response.json())
-
 
 .then(data=>{
 
-
 let table=document.getElementById("volunteerTable");
-
 
 table.innerHTML="";
 
+let assignedReports=data.filter(report=>report.volunteer===username);
 
+if(assignedReports.length===0){
 
-data.forEach(report=>{
-
-
-// only assigned reports
-
-if(report.volunteer == username){
-
-
-table.innerHTML += `
-
-
+table.innerHTML=`
 <tr>
-
-
-<td>
-${report.disasterType}
+<td colspan="8">
+No reports assigned to you yet.
 </td>
-
-
-<td>
-${report.location}
-</td>
-
-
-<td>
-${report.description}
-</td>
-
-
-
-<td>
-
-<span class="badge bg-secondary">
-
-${report.status}
-
-</span>
-
-</td>
-
-
-
-<td>
-
-
-<button class="btn btn-warning btn-sm"
-
-onclick="updateTask('${report.id}','IN_PROGRESS')">
-
-Start
-
-</button>
-
-
-
-<button class="btn btn-success btn-sm mt-2"
-
-onclick="updateTask('${report.id}','RESOLVED')">
-
-Complete
-
-</button>
-
-
-</td>
-
-
-
 </tr>
-
-
 `;
 
+return;
 
 }
 
+assignedReports.forEach(report=>{
+
+let action="";
+
+if(report.status==="ASSIGNED"){
+
+action=`
+
+<button class="btn btn-warning btn-sm"
+onclick="updateTask('${report.id}','IN_PROGRESS')">
+Start
+</button>
+
+`;
+
+}
+
+else if(report.status==="IN_PROGRESS"){
+
+action=`
+
+<button class="btn btn-success btn-sm"
+onclick="updateTask('${report.id}','RESOLVED')">
+Complete
+</button>
+
+`;
+
+}
+
+else if(report.status==="RESOLVED"){
+
+action=`
+
+<span class="badge bg-success">
+Completed
+</span>
+
+`;
+
+}
+
+table.innerHTML+=`
+
+<tr>
+
+<td>${report.disasterType}</td>
+
+<td>${report.location}</td>
+
+<td>
+<span class="badge bg-secondary">
+${report.status}
+</span>
+</td>
+
+<td>
+${report.assignedAt ? new Date(report.assignedAt).toLocaleString() : "-"}
+</td>
+
+<td>
+${report.startedAt ? new Date(report.startedAt).toLocaleString() : "-"}
+</td>
+
+<td>
+${report.resolvedAt ? new Date(report.resolvedAt).toLocaleString() : "-"}
+</td>
+
+<td>
+${report.timeTaken || "-"}
+</td>
+
+<td>
+
+${action}
+
+</td>
+
+</tr>
+
+`;
 
 });
-
-
 
 })
 
 .catch(error=>{
 
-console.log("Error:",error);
+console.log(error);
 
 });
 
-
 }
-
-
-
-
-
 
 
 function updateTask(id,status){
